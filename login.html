@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบผู้ดูแล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { premier: '#38003c', accent: '#00ff87' } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-6">
+                <i class="fa fa-lock text-4xl text-premier mb-2"></i>
+                <h2 class="text-2xl font-bold text-premier">ผู้ดูแลระบบ</h2>
+                <p class="text-gray-500 text-sm mt-1">กรุณาใส่รหัสผ่านเพื่อเข้าจัดการข้อมูล</p>
+            </div>
+
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">รหัสผ่าน</label>
+                    <div class="relative">
+                        <input type="password" id="password" placeholder="กรอกรหัสผ่าน"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-premier/50">
+                        <button type="button" id="toggle-pass" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="error-msg" class="text-red-500 text-sm mb-4 hidden">
+                    <i class="fa fa-exclamation-circle mr-1"></i> รหัสผ่านไม่ถูกต้อง
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-premier hover:bg-premier/90 text-white py-3 rounded-lg font-medium">
+                    <i class="fa fa-sign-in mr-2"></i> เข้าสู่ระบบ
+                </button>
+            </form>
+
+            <p class="text-center text-sm text-gray-500 mt-6">
+                <a href="index.html" class="text-premier hover:underline">← กลับไปหน้าตารางคะแนน</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 🔑 ตั้งรหัสผ่านที่นี่
+        const CORRECT_PASSWORD = "123456";
+
+        document.getElementById('toggle-pass').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('i');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.className = input.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+        });
+
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const pass = document.getElementById('password').value;
+            const error = document.getElementById('error-msg');
+
+            if (pass === CORRECT_PASSWORD) {
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                error.classList.remove('hidden');
+                document.getElementById('password').value = '';
+                setTimeout(() => error.classList.add('hidden'), 3000);
+            }
+        });
+    </script>
+</body>
+</html>

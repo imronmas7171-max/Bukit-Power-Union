@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการข้อมูลตารางคะแนน</title>
+    <script>
+        // ป้องกันคนที่ไม่ได้ล็อกอินเข้ามา
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { premier: '#38003c', accent: '#00ff87' } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-premier text-white py-4 shadow">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa fa-cog mr-2"></i> แผงควบคุมจัดการข้อมูล</h1>
+            <div class="flex gap-2">
+                <a href="index.html" class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded text-sm">
+                    <i class="fa fa-home"></i> หน้าแรก
+                </a>
+                <button id="logout-btn" class="bg-red-500/90 hover:bg-red-600 px-3 py-2 rounded text-sm">
+                    <i class="fa fa-sign-out"></i> ออกจากระบบ
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+        <div id="alert-box" class="hidden mb-6 p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+            <span id="alert-text"></span>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">แก้ไขข้อมูลทีม</h2>
+            <p class="text-gray-500 text-sm mb-6">กรอกข้อมูลแล้วกด "บันทึกข้อมูล" ด้านล่าง คะแนนและผลต่างประตูจะคำนวณให้อัตโนมัติ</p>
+
+            <form id="admin-form">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ชื่อทีม</th>
+                                <th class="p-3 text-center">MP</th>
+                                <th class="p-3 text-center">W</th>
+                                <th class="p-3 text-center">D</th>
+                                <th class="p-3 text-center">L</th>
+                                <th class="p-3 text-center">GF</th>
+                                <th class="p-3 text-center">GA</th>
+                                <th class="p-3 text-center">GD</th>
+                                <th class="p-3 text-center">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="form-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-between">
+                    <button type="button" id="reset-btn" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">
+                        <i class="fa fa-refresh mr-1"></i> รีเซ็ตค่าเดิม
+                    </button>
+                    <button type="submit" class="px-6 py-2 bg-premier hover:bg-premier/90 text-white rounded font-medium">
+                        <i class="fa fa-save mr-1"></i> บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 text-sm text-blue-700">
+            <p><strong>💡 วิธีใช้งาน:</strong> GD = ประตูได้ - ประตูเสีย | Pts = (ชนะ × 3) + เสมอ ระบบคำนวณให้อัตโนมัติ</p>
+        </div>
+    </main>
+
+    <script>
+        const defaultData = [
+            { id: 1, name: 'Arsenal', mp: 10, w: 9, d: 0, l: 1, gf: 25, ga: 5, gd: 20, pts: 27 },
+            { id: 2, name: 'Brighton', mp: 10, w: 7, d: 1, l: 2, gf: 26, ga: 7, gd: 19, pts: 22 },
+            { id: 3, name: 'Manchester City', mp: 10, w: 7, d: 0, l: 3, gf: 21, ga: 13, gd: 8, pts: 21 },
+            { id: 4, name: 'Liverpool', mp: 10, w: 5, d: 3, l: 2, gf: 14, ga: 10, gd: 4, pts: 18 },
+            { id: 5, name: 'Chelsea', mp: 10, w: 5, d: 1, l: 4, gf: 19, ga: 16, gd: 3, pts: 16 },
+            { id: 6, name: 'Everton', mp: 10, w: 4, d: 4, l: 2, gf: 12, ga: 10, gd: 2, pts: 16 }
+        ];
+
+        let teams = JSON.parse(localStorage.getItem('leagueData')) || JSON.parse(JSON.stringify(defaultData));
+        const formBody = document.getElementById('form-body');
+
+        function renderForm() {
+            formBody.innerHTML = '';
+            teams.forEach((team, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-gray-200';
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <input type="text" data-field="name" data-index="${idx}" value="${team.name}"
+                            class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-premier/50">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="mp" data-index="${idx}" value="${team.mp}"
+                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="w" data-index="${idx}" value="${team.w}"
+                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="d" data-index="${idx}" value="${team.d}"
+                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
+                    </td>
+                    <td class="p-3">
+                        <input type
+                   </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="gf" data-index="${idx}" value="${team.gf}" 
+                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-premier/50">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="ga" data-index="${idx}" value="${team.ga}" 
+                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-premier/50">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" data-field="gd" data-index="${idx}" value="${team.gd}" readonly
+                            class="w-16 px-2 py-1.5 border border-gray-200 rounded text-center bg-gray-100 text-gray-600">
+                    </td>
+                    <td class="p-3">
+                        <input type="number" min="0" data-field="pts" data-index="${idx}" value="${team.pts}" readonly
+                            class="w-16 px-2 py-1.5 border border-gray-200 rounded text-center bg-gray-100 font-bold text-premier">
+                    </td>
+                `;
+                formBody.appendChild(tr);
+            });
+        }
+
+        // คำนวณ GD และ Pts อัตโนมัติ
+        function calculateRow(idx) {
+            const team = teams[idx];
+            team.gd = team.gf - team.ga;
+            team.pts = team.w * 3 + team.d;
+        }
+
+        // ตรวจสอบการเปลี่ยนแปลงในฟอร์ม
+        document.addEventListener('input', (e) => {
+            if (e.target.dataset.field && e.target.dataset.index !== undefined) {
+                const idx = parseInt(e.target.dataset.index);
+                const field = e.target.dataset.field;
+                const value = e.target.value;
+                
+                if (field === 'name') {
+                    teams[idx][field] = value;
+                } else {
+                    teams[idx][field] = parseInt(value) || 0;
+                }
+                
+                // คำนวณอัตโนมัติ
+                calculateRow(idx);
+                
+                // อัปเดตค่าในแถวนั้นทันที
+                const row = e.target.closest('tr');
+                row.querySelector('[data-field="gd"]').value = teams[idx].gd;
+                row.querySelector('[data-field="pts"]').value = teams[idx].pts;
+            }
+        });
+
+        // บันทึกข้อมูล
+        document.getElementById('admin-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // บันทึกลง localStorage
+            localStorage.setItem('leagueData', JSON.stringify(teams));
+            
+            // บันทึกเวลาอัปเดต
+            const now = new Date();
+            const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
+            localStorage.setItem('lastUpdate', timeStr);
+            
+            // แสดงข้อความแจ้งเตือน
+            const msgBox = document.getElementById('message-box');
+            msgBox.classList.remove('hidden');
+            document.getElementById('message-text').textContent = '✅ บันทึกข้อมูลสำเร็จแล้ว! กลับไปที่หน้าแรกเพื่อดูผล';
+            
+            setTimeout(() => {
+                msgBox.classList.add('hidden');
+            }, 3000);
+        });
+
+        // ปุ่มรีเซ็ต
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (confirm('ต้องการรีเซ็ตเป็นค่าเดิมใช่หรือไม่?')) {
+                localStorage.removeItem('leagueData');
+                localStorage.removeItem('lastUpdate');
+                teams = JSON.parse(JSON.stringify(defaultTeams));
+                renderForm();
+                const msgBox = document.getElementById('message-box');
+                msgBox.classList.remove('hidden');
+                document.getElementById('message-text').textContent = '🔄 รีเซ็ตข้อมูลเรียบร้อยแล้ว';
+                setTimeout(() => msgBox.classList.add('hidden'), 3000);
+            }
+        });
+
+        // เริ่มต้น
+        renderForm();
+    </script>
+</body>
+</html>
+
+
