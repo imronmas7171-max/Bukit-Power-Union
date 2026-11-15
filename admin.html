@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอดมิน - แก้ไขตารางคะแนน</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 แผงควบคุมแอดมิน</h1>
+        </div>
+
+        <!-- ฟอร์มล็อกอิน -->
+        <div id="login-section" class="card">
+            <h2>กรุณาใส่รหัสผ่าน</h2>
+            <input type="password" id="admin-password" placeholder="ใส่รหัสที่นี่">
+            <button onclick="checkPassword()">เข้าสู่ระบบ</button>
+            <p id="error-msg" class="error"></p>
+        </div>
+
+        <!-- ส่วนแก้ไขข้อมูล (ซ่อนไว้ก่อนล็อกอิน) -->
+        <div id="admin-panel" class="card hidden">
+            <h2>แก้ไขข้อมูลทีม</h2>
+            <p class="note">เลือกทีมจากตารางด้านล่าง แล้วแก้ไขค่าที่นี่</p>
+            
+            <div class="form-grid">
+                <label>ชื่อทีม:</label>
+                <input type="text" id="edit-name" readonly>
+                
+                <label>เล่นนัด (MP):</label>
+                <input type="number" id="edit-mp" min="0">
+                
+                <label>ชนะ (W):</label>
+                <input type="number" id="edit-w" min="0">
+                
+                <label>เสมอ (D):</label>
+                <input type="number" id="edit-d" min="0">
+                
+                <label>แพ้ (L):</label>
+                <input type="number" id="edit-l" min="0">
+                
+                <label>ประตูได้ (GF):</label>
+                <input type="number" id="edit-gf" min="0">
+                
+                <label>ประตูเสีย (GA):</label>
+                <input type="number" id="edit-ga" min="0">
+            </div>
+            
+            <button onclick="saveTeam()" class="btn-save">💾 บันทึกข้อมูล</button>
+            <button onclick="logout()" class="btn-logout">ออกจากระบบ</button>
+            <span id="save-msg" class="success hidden">✅ บันทึกเรียบร้อย!</span>
+        </div>
+
+        <!-- ตารางสำหรับเลือกแก้ไข -->
+        <div id="admin-table-wrapper" class="hidden">
+            <h3>คลิกทีมเพื่อแก้ไข</h3>
+            <table id="admin-standings">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>สโมสร</th>
+                        <th>MP</th>
+                        <th>W</th>
+                        <th>D</th>
+                        <th>L</th>
+                        <th>GF</th>
+                        <th>GA</th>
+                        <th>GD</th>
+                        <th>Pts</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <a href="index.html">← กลับไปหน้าผลการแข่งขัน</a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
