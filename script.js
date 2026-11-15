@@ -9,20 +9,6 @@ let teamsData = [
     { pos: 4, name: "Liverpool", mp: 10, w: 5, d: 3, l: 2, gf: 14, ga: 10 },
     { pos: 5, name: "Chelsea", mp: 10, w: 5, d: 1, l: 4, gf: 19, ga: 16 },
     { pos: 6, name: "Everton", mp: 10, w: 4, d: 4, l: 2, gf: 12, ga: 10 },
-    { pos: 7, name: "Bournemouth", mp: 10, w: 4, d: 3, l: 3, gf: 16, ga: 14 },
-    { pos: 8, name: "Brentford", mp: 10, w: 3, d: 5, l: 2, gf: 16, ga: 11 },
-    { pos: 9, name: "Leeds United", mp: 10, w: 3, d: 5, l: 2, gf: 10, ga: 8 },
-    { pos: 10, name: "Aston Villa", mp: 10, w: 3, d: 4, l: 3, gf: 14, ga: 17 },
-    { pos: 11, name: "Tottenham Hotspur", mp: 10, w: 3, d: 3, l: 4, gf: 10, ga: 11 },
-    { pos: 12, name: "Newcastle United", mp: 10, w: 3, d: 3, l: 4, gf: 13, ga: 16 },
-    { pos: 13, name: "Hull City", mp: 10, w: 2, d: 5, l: 3, gf: 11, ga: 11 },
-    { pos: 14, name: "Ipswich Town", mp: 10, w: 2, d: 2, l: 5, gf: 20, ga: 12 },
-    { pos: 15, name: "Fulham", mp: 10, w: 2, d: 4, l: 4, gf: 10, ga: 12 },
-    { pos: 16, name: "Nottingham Forest", mp: 10, w: 2, d: 3, l: 5, gf: 9, ga: 13 },
-    { pos: 17, name: "Coventry City", mp: 10, w: 3, d: 0, l: 7, gf: 10, ga: 19 },
-    { pos: 18, name: "Manchester United", mp: 10, w: 1, d: 5, l: 4, gf: 14, ga: 9 },
-    { pos: 19, name: "Sunderland", mp: 10, w: 2, d: 2, l: 6, gf: 8, ga: 17 },
-    { pos: 20, name: "Crystal Palace", mp: 10, w: 2, d: 1, l: 7, gf: 10, ga: 24 }
 ];
 
 let selectedIndex = null;
