@@ -80,134 +80,121 @@
         </div>
     </main>
 
-    <script>
-        const defaultData = [
-            { id: 1, name: 'Arsenal', mp: 10, w: 9, d: 0, l: 1, gf: 25, ga: 5, gd: 20, pts: 27 },
-            { id: 2, name: 'Brighton', mp: 10, w: 7, d: 1, l: 2, gf: 26, ga: 7, gd: 19, pts: 22 },
-            { id: 3, name: 'Manchester City', mp: 10, w: 7, d: 0, l: 3, gf: 21, ga: 13, gd: 8, pts: 21 },
-            { id: 4, name: 'Liverpool', mp: 10, w: 5, d: 3, l: 2, gf: 14, ga: 10, gd: 4, pts: 18 },
-            { id: 5, name: 'Chelsea', mp: 10, w: 5, d: 1, l: 4, gf: 19, ga: 16, gd: 3, pts: 16 },
-            { id: 6, name: 'Everton', mp: 10, w: 4, d: 4, l: 2, gf: 12, ga: 10, gd: 2, pts: 16 }
-        ];
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script>
+    const FIREBASE_URL = "https://bukit-power-union-cup-default-rtdb.asia-southeast1.firebasedatabase.app/";
+    
+    const defaultData = [
+        { id: 1, name: 'Arsenal', mp: 10, w: 9, d: 0, l: 1, gf: 25, ga: 5, gd: 20, pts: 27 },
+        { id: 2, name: 'Brighton', mp: 10, w: 7, d: 1, l: 2, gf: 26, ga: 7, gd: 19, pts: 22 },
+        { id: 3, name: 'Manchester City', mp: 10, w: 7, d: 0, l: 3, gf: 21, ga: 13, gd: 8, pts: 21 },
+        { id: 4, name: 'Liverpool', mp: 10, w: 5, d: 3, l: 2, gf: 14, ga: 10, gd: 4, pts: 18 },
+        { id: 5, name: 'Chelsea', mp: 10, w: 5, d: 1, l: 4, gf: 19, ga: 16, gd: 3, pts: 16 },
+        { id: 6, name: 'Everton', mp: 10, w: 4, d: 4, l: 2, gf: 12, ga: 10, gd: 2, pts: 16 }
+    ];
 
-        let teams = JSON.parse(localStorage.getItem('leagueData')) || JSON.parse(JSON.stringify(defaultData));
+    let teams = [];
+    
+    function initFirebase() {
+        const firebaseConfig = { databaseURL: FIREBASE_URL };
+        if (!window.firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    }
+
+    async function loadData() {
+        initFirebase();
+        const db = firebase.database();
+        const ref = db.ref('teams');
+        
+        ref.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) {
+                ref.set(defaultData);
+                teams = [...defaultData];
+            } else {
+                teams = Object.values(data);
+            }
+            renderForm();
+        });
+    }
+
+    function renderForm() {
         const formBody = document.getElementById('form-body');
+        formBody.innerHTML = '';
+        
+        teams.forEach((team, idx) => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-200';
+            row.innerHTML = `
+                <td class="p-2"><input type="text" data-field="name" data-index="${idx}" value="${team.name}" class="w-full px-2 py-1 border rounded"></td>
+                <td class="p-2"><input type="number" data-field="mp" data-index="${idx}" value="${team.mp}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2"><input type="number" data-field="w" data-index="${idx}" value="${team.w}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2"><input type="number" data-field="d" data-index="${idx}" value="${team.d}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2"><input type="number" data-field="l" data-index="${idx}" value="${team.l}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2"><input type="number" data-field="gf" data-index="${idx}" value="${team.gf}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2"><input type="number" data-field="ga" data-index="${idx}" value="${team.ga}" class="w-16 px-2 py-1 border rounded text-center"></td>
+                <td class="p-2 bg-gray-100 text-center font-medium">${team.gd}</td>
+                <td class="p-2 bg-gray-100 text-center font-bold">${team.pts}</td>
+            `;
+            formBody.appendChild(row);
+        });
+    }
 
-        function renderForm() {
-            formBody.innerHTML = '';
-            teams.forEach((team, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-200';
-                tr.innerHTML = `
-                    <td class="p-3">
-                        <input type="text" data-field="name" data-index="${idx}" value="${team.name}"
-                            class="w-full px-2 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-premier/50">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="mp" data-index="${idx}" value="${team.mp}"
-                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="w" data-index="${idx}" value="${team.w}"
-                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="d" data-index="${idx}" value="${team.d}"
-                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center">
-                    </td>
-                    <td class="p-3">
-                        <input type
-                   </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="gf" data-index="${idx}" value="${team.gf}" 
-                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-premier/50">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="ga" data-index="${idx}" value="${team.ga}" 
-                            class="w-16 px-2 py-1.5 border border-gray-300 rounded text-center focus:outline-none focus:ring-2 focus:ring-premier/50">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" data-field="gd" data-index="${idx}" value="${team.gd}" readonly
-                            class="w-16 px-2 py-1.5 border border-gray-200 rounded text-center bg-gray-100 text-gray-600">
-                    </td>
-                    <td class="p-3">
-                        <input type="number" min="0" data-field="pts" data-index="${idx}" value="${team.pts}" readonly
-                            class="w-16 px-2 py-1.5 border border-gray-200 rounded text-center bg-gray-100 font-bold text-premier">
-                    </td>
-                `;
-                formBody.appendChild(tr);
-            });
+    function calculateStats(team) {
+        team.gd = team.gf - team.ga;
+        team.pts = (team.w * 3) + team.d;
+        return team;
+    }
+
+    document.getElementById('admin-form').addEventListener('input', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        const field = e.target.dataset.field;
+        let value = e.target.value;
+        
+        if (['mp', 'w', 'd', 'l', 'gf', 'ga'].includes(field)) {
+            value = parseInt(value) || 0;
         }
-
-        // คำนวณ GD และ Pts อัตโนมัติ
-        function calculateRow(idx) {
-            const team = teams[idx];
-            team.gd = team.gf - team.ga;
-            team.pts = team.w * 3 + team.d;
-        }
-
-        // ตรวจสอบการเปลี่ยนแปลงในฟอร์ม
-        document.addEventListener('input', (e) => {
-            if (e.target.dataset.field && e.target.dataset.index !== undefined) {
-                const idx = parseInt(e.target.dataset.index);
-                const field = e.target.dataset.field;
-                const value = e.target.value;
-                
-                if (field === 'name') {
-                    teams[idx][field] = value;
-                } else {
-                    teams[idx][field] = parseInt(value) || 0;
-                }
-                
-                // คำนวณอัตโนมัติ
-                calculateRow(idx);
-                
-                // อัปเดตค่าในแถวนั้นทันที
-                const row = e.target.closest('tr');
-                row.querySelector('[data-field="gd"]').value = teams[idx].gd;
-                row.querySelector('[data-field="pts"]').value = teams[idx].pts;
-            }
-        });
-
-        // บันทึกข้อมูล
-        document.getElementById('admin-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // บันทึกลง localStorage
-            localStorage.setItem('leagueData', JSON.stringify(teams));
-            
-            // บันทึกเวลาอัปเดต
-            const now = new Date();
-            const timeStr = now.toLocaleDateString('th-TH') + ' ' + now.toLocaleTimeString('th-TH');
-            localStorage.setItem('lastUpdate', timeStr);
-            
-            // แสดงข้อความแจ้งเตือน
-            const msgBox = document.getElementById('message-box');
-            msgBox.classList.remove('hidden');
-            document.getElementById('message-text').textContent = '✅ บันทึกข้อมูลสำเร็จแล้ว! กลับไปที่หน้าแรกเพื่อดูผล';
-            
-            setTimeout(() => {
-                msgBox.classList.add('hidden');
-            }, 3000);
-        });
-
-        // ปุ่มรีเซ็ต
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            if (confirm('ต้องการรีเซ็ตเป็นค่าเดิมใช่หรือไม่?')) {
-                localStorage.removeItem('leagueData');
-                localStorage.removeItem('lastUpdate');
-                teams = JSON.parse(JSON.stringify(defaultTeams));
-                renderForm();
-                const msgBox = document.getElementById('message-box');
-                msgBox.classList.remove('hidden');
-                document.getElementById('message-text').textContent = '🔄 รีเซ็ตข้อมูลเรียบร้อยแล้ว';
-                setTimeout(() => msgBox.classList.add('hidden'), 3000);
-            }
-        });
-
-        // เริ่มต้น
+        
+        teams[index][field] = value;
+        teams[index] = calculateStats(teams[index]);
         renderForm();
-    </script>
+    });
+
+    document.getElementById('admin-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const db = firebase.database();
+        const ref = db.ref('teams');
+        
+        await ref.set(teams);
+        
+        const alertBox = document.getElementById('alert-box');
+        document.getElementById('alert-text').textContent = '✅ บันทึกข้อมูลสำเร็จ! ทุกคนเห็นข้อมูลทันที';
+        alertBox.classList.remove('hidden');
+        
+        setTimeout(() => {
+            alertBox.classList.add('hidden');
+        }, 3000);
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', async () => {
+        if (confirm('ต้องการรีเซ็ตข้อมูลเป็นค่าเริ่มต้นใช่ไหม?')) {
+            const db = firebase.database();
+            const ref = db.ref('teams');
+            await ref.set(defaultData);
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'login.html';
+    });
+
+    loadData();
+</script>
+
 </body>
 </html>
 
